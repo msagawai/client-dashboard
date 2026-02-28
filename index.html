@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クライアント進捗ダッシュボード</title>
+<style>
+:root {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-hover: #334155;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --ok: #22c55e;
+  --ok-bg: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-bg: rgba(245,158,11,0.12);
+  --alert: #ef4444;
+  --alert-bg: rgba(239,68,68,0.12);
+  --completed: #64748b;
+  --completed-bg: rgba(100,116,139,0.12);
+  --unknown: #64748b;
+  --unknown-bg: rgba(100,116,139,0.12);
+  --border: #334155;
+  --accent: #3b82f6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+    "Noto Sans JP", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+header .updated {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.summary-bar {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.summary-item.alert { background: var(--alert-bg); color: var(--alert); }
+.summary-item.warn { background: var(--warn-bg); color: var(--warn); }
+.summary-item.ok { background: var(--ok-bg); color: var(--ok); }
+.summary-item.completed { background: var(--completed-bg); color: var(--completed); }
+.summary-count {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.alert-banner {
+  background: var(--alert-bg);
+  border: 1px solid var(--alert);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+}
+.alert-banner h3 {
+  color: var(--alert);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+.alert-banner ul {
+  list-style: none;
+  padding: 0;
+}
+.alert-banner li {
+  padding: 3px 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.alert-banner .days {
+  color: var(--alert);
+  font-weight: 700;
+}
+
+.section {
+  margin-bottom: 28px;
+}
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  transition: background 0.15s;
+}
+.card:hover {
+  background: var(--surface-hover);
+}
+.card.alert {
+  border-left: 3px solid var(--alert);
+}
+.card.warn {
+  border-left: 3px solid var(--warn);
+}
+.card.ok {
+  border-left: 3px solid var(--ok);
+}
+.card.completed {
+  border-left: 3px solid var(--completed);
+  opacity: 0.7;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.card-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.card-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.card-badge.alert { background: var(--alert-bg); color: var(--alert); }
+.card-badge.warn { background: var(--warn-bg); color: var(--warn); }
+.card-badge.ok { background: var(--ok-bg); color: var(--ok); }
+.card-badge.completed { background: var(--completed-bg); color: var(--completed); }
+
+.card-body {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.card-body .label {
+  display: inline-block;
+  width: 80px;
+  color: var(--text-muted);
+}
+.card-body .value {
+  color: var(--text);
+}
+.card-sender {
+  margin-top: 6px;
+  font-size: 0.8rem;
+}
+.card-sender.from-client {
+  color: var(--alert);
+  font-weight: 600;
+}
+.card-sender.from-me {
+  color: var(--text-muted);
+}
+
+details.completed-section {
+  margin-top: 28px;
+}
+details.completed-section summary {
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding-left: 10px;
+  border-left: 3px solid var(--completed);
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+@media (max-width: 600px) {
+  .container { padding: 12px 10px; }
+  header h1 { font-size: 1.2rem; }
+  .cards { grid-template-columns: 1fr; }
+  .summary-bar { gap: 8px; }
+  .summary-item { padding: 6px 12px; font-size: 0.85rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>クライアント進捗ダッシュボード</h1>
+    <div class="updated" id="updated"></div>
+  </header>
+
+  <div class="summary-bar" id="summary-bar"></div>
+
+  <div id="alert-banner"></div>
+
+  <div id="active-section"></div>
+
+  <div id="completed-section"></div>
+
+</div>
+
+<script>
+var DATA = {"updated_at": "2026-02-28 18:46", "summary": {"alert": 1, "warn": 1, "ok": 2, "completed": 8}, "clients": [{"name": "高橋和子", "service": "PPrS", "room_id": 419583381, "completed": true, "last_message": "[rp aid=295944 to=419583381-2079136530479452160] 寒川井　誠 さん\n\nわかりました☺️\n丁寧に教えて下さり\nありがとうございました。m(_ _)m", "last_sender_is_me": false, "last_sender_name": "高橋和子", "last_time": 1772194792, "days_ago": 0.9, "last_date": "2026-02-27", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "堺律子", "service": "PPrS", "room_id": 419583365, "completed": true, "last_message": "なるほど､やってみます。\nありがとうございます。", "last_sender_is_me": false, "last_sender_name": "堺 梨鶴子", "last_time": 1770895610, "days_ago": 15.9, "last_date": "2026-02-12", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "大澤直美", "service": "PPrS", "room_id": 419583376, "completed": false, "last_message": "[qt][qtmeta aid=10940262 time=1772068863][To:295944]寒川井　誠さん\n[To:297293]マツダミヒロさん\n上記了解しました！　時差は日米は慣れてい", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772073993, "days_ago": 2.3, "last_date": "2026-02-26", "status": "提出待ち", "status_class": "ok", "status_detail": "返信済み"}, {"name": "榊原小夕里", "service": "PPrS", "room_id": 419583369, "completed": true, "last_message": "よかったです！", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772162421, "days_ago": 1.3, "last_date": "2026-02-27", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "西條恵理子", "service": "PPrS", "room_id": 419820394, "completed": true, "last_message": "[rp aid=271945 to=419820394-2069277571237023744]野田恵美さん\nまだ先になりますが、よろしくお願いします🙇‍♀️", "last_sender_is_me": false, "last_sender_name": "西條 恵理子", "last_time": 1769844481, "days_ago": 28.1, "last_date": "2026-01-31", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "田中慶子", "service": "PPrS", "room_id": 422221693, "completed": true, "last_message": "[qt][qtmeta aid=9490009 time=1771757988]ミヒロさん、まこっちさん、今日は魔法のコンサル！ありがとうございました。\nなんか嬉しくて、私が、喋り過ぎたなぁ、、と反省", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1771761690, "days_ago": 5.9, "last_date": "2026-02-22", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "ヤマダカオリ", "service": "PPS", "room_id": 407960999, "completed": false, "last_message": "[qt][qtmeta aid=9511201 time=1772188122][To:271945]野田恵美さん\nこんばんは。セクション4レッスン4を書いてみました。ご助言お願いいたします。\n[in", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772196980, "days_ago": 0.9, "last_date": "2026-02-27", "status": "提出待ち", "status_class": "ok", "status_detail": "返信済み"}, {"name": "稲月仁一", "service": "PPS", "room_id": 406170733, "completed": true, "last_message": "[rp aid=238764 to=406170733-2075432756598542336] 猪野裕介（土日祝休業） さん\nなるほどですね\nありがとうございます！", "last_sender_is_me": false, "last_sender_name": "稲月　仁一", "last_time": 1771297299, "days_ago": 11.3, "last_date": "2026-02-17", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "間庭さやか", "service": "PPS", "room_id": 381366656, "completed": true, "last_message": "[rp aid=271945 to=381366656-2074074590665244672]野田恵美さん\nとてもよくわかりました。ありがとうございます。", "last_sender_is_me": false, "last_sender_name": "間庭 さやか", "last_time": 1771042856, "days_ago": 14.2, "last_date": "2026-02-14", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "井上おのもも", "service": "PPS", "room_id": 401415718, "completed": false, "last_message": "[To:271945]野田恵美さん\n\nいつも大変お世話になっております。\n先程はご教授いただきまして、ありがとうございます。\n\n修正をさせていただきましたので、お時間ございます時にご添削いただけますと", "last_sender_is_me": false, "last_sender_name": "井上美由紀【おのもも】", "last_time": 1772269619, "days_ago": 0.0, "last_date": "2026-02-28", "status": "回答待ち", "status_class": "alert", "status_detail": "クライアントから"}, {"name": "國島由規子", "service": "PPS", "room_id": 409340910, "completed": false, "last_message": "[rp aid=1350941 to=409340910-2076142552410750976]國島　由規子さん\nご連絡ありがとうございます！\n\nパソコンの不具合が続いているとのこと、\nそれはストレ", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1771465949, "days_ago": 9.3, "last_date": "2026-02-19", "status": "提出待ち（注意）", "status_class": "warn", "status_detail": "9日経過"}, {"name": "松田喜子", "service": "PPS", "room_id": 181532751, "completed": true, "last_message": "[To:238764]のっち\n補足がありましたら、お願い致します。", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772186700, "days_ago": 1.0, "last_date": "2026-02-27", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}]};
+
+function esc(s) {
+  var d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function daysAgoText(d) {
+  if (d === null || d === undefined) return "---";
+  var n = Math.floor(d);
+  if (n === 0) return "今日";
+  if (n === 1) return "1日前";
+  return n + "日前";
+}
+
+function renderCard(c) {
+  var cls = c.status_class || "unknown";
+  var badge = '<span class="card-badge ' + cls + '">' + esc(c.status) + '</span>';
+  var lastDate = c.last_date || "---";
+  var days = daysAgoText(c.days_ago);
+
+  var senderCls = c.last_sender_is_me ? "from-me" : "from-client";
+  var senderText = c.last_sender_is_me ? "チーム対応済み" : (c.last_sender_name || "クライアント") + "から";
+
+  return '<div class="card ' + cls + '">' +
+    '<div class="card-header">' +
+      '<span class="card-name">' + esc(c.name) + '</span>' +
+      badge +
+    '</div>' +
+    '<div class="card-body">' +
+      '<div><span class="label">' + esc(c.service) + '</span></div>' +
+      '<div><span class="label">最終</span><span class="value">' + lastDate + '（' + days + '）</span></div>' +
+    '</div>' +
+    '<div class="card-sender ' + senderCls + '">' + senderText + '</div>' +
+  '</div>';
+}
+
+function renderAlerts(clients) {
+  var alerts = clients.filter(function(c) { return c.status_class === "alert"; });
+  if (!alerts.length) return '';
+  var items = alerts.map(function(c) {
+    var days = daysAgoText(c.days_ago);
+    return '<li>&#x1F534; <strong>' + esc(c.name) + '</strong>（' +
+      esc(c.service) + '）<span class="days">' + days + '</span></li>';
+  }).join('');
+  return '<div class="alert-banner">' +
+    '<h3>要対応（回答待ち）</h3>' +
+    '<ul>' + items + '</ul>' +
+  '</div>';
+}
+
+function render() {
+  document.getElementById("updated").textContent = "更新: " + DATA.updated_at;
+
+  var s = DATA.summary;
+  document.getElementById("summary-bar").innerHTML =
+    '<div class="summary-item alert"><span class="summary-count">' + s.alert + '</span> 回答待ち</div>' +
+    '<div class="summary-item warn"><span class="summary-count">' + s.warn + '</span> 注意</div>' +
+    '<div class="summary-item ok"><span class="summary-count">' + s.ok + '</span> 提出待ち</div>' +
+    '<div class="summary-item completed"><span class="summary-count">' + s.completed + '</span> 完了</div>';
+
+  var clients = DATA.clients;
+  document.getElementById("alert-banner").innerHTML = renderAlerts(clients);
+
+  // アクティブ（完了以外）をステータス順にソート: alert → warn → ok → unknown
+  var order = { alert: 0, warn: 1, ok: 2, unknown: 3 };
+  var active = clients.filter(function(c) { return c.status_class !== "completed"; });
+  active.sort(function(a, b) {
+    var oa = order[a.status_class] !== undefined ? order[a.status_class] : 3;
+    var ob = order[b.status_class] !== undefined ? order[b.status_class] : 3;
+    if (oa !== ob) return oa - ob;
+    return (a.days_ago || 0) - (b.days_ago || 0);
+  });
+
+  // サービス別に分割（PPrSを上、PPSを下）
+  var pprs = active.filter(function(c) { return c.service === "PPrS"; });
+  var pps = active.filter(function(c) { return c.service === "PPS"; });
+
+  var html = '';
+  if (pprs.length) {
+    html += '<div class="section"><div class="section-title">PPrS</div><div class="cards">' +
+      pprs.map(renderCard).join('') + '</div></div>';
+  }
+  if (pps.length) {
+    html += '<div class="section"><div class="section-title">PPS</div><div class="cards">' +
+      pps.map(renderCard).join('') + '</div></div>';
+  }
+  document.getElementById("active-section").innerHTML = html;
+
+  // 完了セクション（折りたたみ）
+  var done = clients.filter(function(c) { return c.status_class === "completed"; });
+  if (done.length) {
+    document.getElementById("completed-section").innerHTML =
+      '<details class="completed-section"><summary>完了（' + done.length + '名）</summary>' +
+      '<div class="cards">' + done.map(renderCard).join('') + '</div></details>';
+  }
+}
+
+render();
+</script>
+</body>
+</html>
