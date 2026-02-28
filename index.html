@@ -182,6 +182,16 @@ header .updated {
 .card-body .value {
   color: var(--text);
 }
+.card-message {
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  word-break: break-word;
+}
 .card-sender {
   margin-top: 6px;
   font-size: 0.8rem;
@@ -193,6 +203,40 @@ header .updated {
 .card-sender.from-me {
   color: var(--text-muted);
 }
+.card-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.status-btn {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.status-btn:hover { background: var(--surface-hover); color: var(--text); }
+.status-btn.active { border-color: var(--accent); color: var(--accent); }
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-hover);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 100;
+}
+.toast.show { opacity: 1; }
 
 details.completed-section {
   margin-top: 28px;
@@ -233,9 +277,10 @@ details.completed-section summary {
   <div id="completed-section"></div>
 
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-var DATA = {"updated_at": "2026-02-28 18:51", "summary": {"alert": 1, "warn": 2, "ok": 2, "completed": 7}, "clients": [{"name": "高橋和子", "service": "PPrS", "room_id": 419583381, "completed": true, "last_sender_is_me": false, "last_sender_name": "高橋和子", "last_time": 1772194792, "days_ago": 0.9, "last_date": "2026-02-27", "status": "要確認", "status_class": "warn", "status_detail": "完了→新着あり"}, {"name": "堺律子", "service": "PPrS", "room_id": 419583365, "completed": true, "last_sender_is_me": false, "last_sender_name": "堺 梨鶴子", "last_time": 1770895610, "days_ago": 15.9, "last_date": "2026-02-12", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "大澤直美", "service": "PPrS", "room_id": 419583376, "completed": false, "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772073993, "days_ago": 2.3, "last_date": "2026-02-26", "status": "提出待ち", "status_class": "ok", "status_detail": "返信済み"}, {"name": "榊原小夕里", "service": "PPrS", "room_id": 419583369, "completed": true, "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772162421, "days_ago": 1.3, "last_date": "2026-02-27", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "西條恵理子", "service": "PPrS", "room_id": 419820394, "completed": true, "last_sender_is_me": false, "last_sender_name": "西條 恵理子", "last_time": 1769844481, "days_ago": 28.1, "last_date": "2026-01-31", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "田中慶子", "service": "PPrS", "room_id": 422221693, "completed": true, "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1771761690, "days_ago": 5.9, "last_date": "2026-02-22", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "ヤマダカオリ", "service": "PPS", "room_id": 407960999, "completed": false, "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772196980, "days_ago": 0.9, "last_date": "2026-02-27", "status": "提出待ち", "status_class": "ok", "status_detail": "返信済み"}, {"name": "稲月仁一", "service": "PPS", "room_id": 406170733, "completed": true, "last_sender_is_me": false, "last_sender_name": "稲月　仁一", "last_time": 1771297299, "days_ago": 11.3, "last_date": "2026-02-17", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "間庭さやか", "service": "PPS", "room_id": 381366656, "completed": true, "last_sender_is_me": false, "last_sender_name": "間庭 さやか", "last_time": 1771042856, "days_ago": 14.2, "last_date": "2026-02-14", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "井上おのもも", "service": "PPS", "room_id": 401415718, "completed": false, "last_sender_is_me": false, "last_sender_name": "井上美由紀【おのもも】", "last_time": 1772269619, "days_ago": 0.0, "last_date": "2026-02-28", "status": "回答待ち", "status_class": "alert", "status_detail": "クライアントから"}, {"name": "國島由規子", "service": "PPS", "room_id": 409340910, "completed": false, "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1771465949, "days_ago": 9.3, "last_date": "2026-02-19", "status": "提出待ち（注意）", "status_class": "warn", "status_detail": "9日経過"}, {"name": "松田喜子", "service": "PPS", "room_id": 181532751, "completed": true, "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772186700, "days_ago": 1.0, "last_date": "2026-02-27", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}]};
+var DATA = {"updated_at": "2026-02-28 18:55", "summary": {"alert": 1, "warn": 2, "ok": 2, "completed": 7}, "clients": [{"name": "高橋和子", "service": "PPrS", "room_id": 419583381, "completed": true, "last_message": "わかりました☺️ 丁寧に教えて下さり ありがとうございました。m(_ _)m", "last_sender_is_me": false, "last_sender_name": "高橋和子", "last_time": 1772194792, "days_ago": 0.9, "last_date": "2026-02-27", "status": "要確認", "status_class": "warn", "status_detail": "完了→新着あり"}, {"name": "堺律子", "service": "PPrS", "room_id": 419583365, "completed": true, "last_message": "なるほど､やってみます。 ありがとうございます。", "last_sender_is_me": false, "last_sender_name": "堺 梨鶴子", "last_time": 1770895610, "days_ago": 15.9, "last_date": "2026-02-12", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "大澤直美", "service": "PPrS", "room_id": 419583376, "completed": false, "last_message": "マツダミヒロさん 上記了解しました！　時差は日米は慣れてい", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772073993, "days_ago": 2.3, "last_date": "2026-02-26", "status": "提出待ち", "status_class": "ok", "status_detail": "返信済み"}, {"name": "榊原小夕里", "service": "PPrS", "room_id": 419583369, "completed": true, "last_message": "よかったです！", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772162421, "days_ago": 1.3, "last_date": "2026-02-27", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "西條恵理子", "service": "PPrS", "room_id": 419820394, "completed": true, "last_message": "まだ先になりますが、よろしくお願いします🙇‍♀️", "last_sender_is_me": false, "last_sender_name": "西條 恵理子", "last_time": 1769844481, "days_ago": 28.1, "last_date": "2026-01-31", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "田中慶子", "service": "PPrS", "room_id": 422221693, "completed": true, "last_message": "、まこっちさん、今日は魔法のコンサル！ありがとうございました。 なんか嬉しくて、私が、喋り過ぎたなぁ、、と反省", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1771761690, "days_ago": 5.9, "last_date": "2026-02-22", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "ヤマダカオリ", "service": "PPS", "room_id": 407960999, "completed": false, "last_message": "こんばんは。セクション4レッスン4を書いてみました。ご助言お願いいたします。 [in", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772196980, "days_ago": 0.9, "last_date": "2026-02-27", "status": "提出待ち", "status_class": "ok", "status_detail": "返信済み"}, {"name": "稲月仁一", "service": "PPS", "room_id": 406170733, "completed": true, "last_message": "なるほどですね ありがとうございます！", "last_sender_is_me": false, "last_sender_name": "稲月　仁一", "last_time": 1771297299, "days_ago": 11.3, "last_date": "2026-02-17", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "間庭さやか", "service": "PPS", "room_id": 381366656, "completed": true, "last_message": "とてもよくわかりました。ありがとうございます。", "last_sender_is_me": false, "last_sender_name": "間庭 さやか", "last_time": 1771042856, "days_ago": 14.2, "last_date": "2026-02-14", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}, {"name": "井上おのもも", "service": "PPS", "room_id": 401415718, "completed": false, "last_message": "いつも大変お世話になっております。 先程はご教授いただきまして、ありがとうございます。  修正をさせていただきましたので...", "last_sender_is_me": false, "last_sender_name": "井上美由紀【おのもも】", "last_time": 1772269619, "days_ago": 0.0, "last_date": "2026-02-28", "status": "回答待ち", "status_class": "alert", "status_detail": "クライアントから"}, {"name": "國島由規子", "service": "PPS", "room_id": 409340910, "completed": false, "last_message": "ご連絡ありがとうございます！  パソコンの不具合が続いているとのこと、 それはストレ", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1771465949, "days_ago": 9.3, "last_date": "2026-02-19", "status": "提出待ち（注意）", "status_class": "warn", "status_detail": "9日経過"}, {"name": "松田喜子", "service": "PPS", "room_id": 181532751, "completed": true, "last_message": "のっち 補足がありましたら、お願い致します。", "last_sender_is_me": true, "last_sender_name": "チーム", "last_time": 1772186700, "days_ago": 1.0, "last_date": "2026-02-27", "status": "完了", "status_class": "completed", "status_detail": "サービス提供完了"}]};
 
 function esc(s) {
   var d = document.createElement("div");
@@ -251,14 +296,64 @@ function daysAgoText(d) {
   return n + "日前";
 }
 
+var STATUS_OPTIONS = [
+  { key: "alert", label: "回答待ち" },
+  { key: "warn", label: "注意" },
+  { key: "ok", label: "提出待ち" },
+  { key: "completed", label: "完了" }
+];
+
+function getOverride(name) {
+  try { return JSON.parse(localStorage.getItem("dash_override") || "{}")[name] || null; }
+  catch(e) { return null; }
+}
+
+function setOverride(name, statusClass) {
+  try {
+    var o = JSON.parse(localStorage.getItem("dash_override") || "{}");
+    o[name] = statusClass;
+    localStorage.setItem("dash_override", JSON.stringify(o));
+  } catch(e) {}
+}
+
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(function() { t.classList.remove("show"); }, 2000);
+}
+
+function changeStatus(name, newCls) {
+  setOverride(name, newCls);
+  var label = STATUS_OPTIONS.filter(function(s) { return s.key === newCls; })[0];
+  showToast(name + " → " + (label ? label.label : newCls));
+  render();
+}
+
+function effectiveStatus(c) {
+  var ov = getOverride(c.name);
+  if (!ov) return { status_class: c.status_class, status: c.status };
+  var label = STATUS_OPTIONS.filter(function(s) { return s.key === ov; })[0];
+  return { status_class: ov, status: label ? label.label : ov };
+}
+
 function renderCard(c) {
-  var cls = c.status_class || "unknown";
-  var badge = '<span class="card-badge ' + cls + '">' + esc(c.status) + '</span>';
+  var eff = effectiveStatus(c);
+  var cls = eff.status_class;
+  var badge = '<span class="card-badge ' + cls + '">' + esc(eff.status) + '</span>';
   var lastDate = c.last_date || "---";
   var days = daysAgoText(c.days_ago);
 
   var senderCls = c.last_sender_is_me ? "from-me" : "from-client";
   var senderText = c.last_sender_is_me ? "チーム対応済み" : (c.last_sender_name || "クライアント") + "から";
+
+  var msg = c.last_message ? '<div class="card-message">' + esc(c.last_message) + '</div>' : '';
+
+  var btns = STATUS_OPTIONS.map(function(s) {
+    var active = s.key === cls ? " active" : "";
+    return '<button class="status-btn' + active + '" onclick="changeStatus('' +
+      c.name.replace(/'/g, "\'") + '','' + s.key + '')">' + s.label + '</button>';
+  }).join('');
 
   return '<div class="card ' + cls + '">' +
     '<div class="card-header">' +
@@ -270,11 +365,13 @@ function renderCard(c) {
       '<div><span class="label">最終</span><span class="value">' + lastDate + '（' + days + '）</span></div>' +
     '</div>' +
     '<div class="card-sender ' + senderCls + '">' + senderText + '</div>' +
+    msg +
+    '<div class="card-actions">' + btns + '</div>' +
   '</div>';
 }
 
 function renderAlerts(clients) {
-  var alerts = clients.filter(function(c) { return c.status_class === "alert"; });
+  var alerts = clients.filter(function(c) { return effectiveStatus(c).status_class === "alert"; });
   if (!alerts.length) return '';
   var items = alerts.map(function(c) {
     var days = daysAgoText(c.days_ago);
@@ -290,22 +387,29 @@ function renderAlerts(clients) {
 function render() {
   document.getElementById("updated").textContent = "更新: " + DATA.updated_at;
 
-  var s = DATA.summary;
+  var clients = DATA.clients;
+
+  // localStorageオーバーライドを反映したサマリーを計算
+  var s = { alert: 0, warn: 0, ok: 0, completed: 0 };
+  clients.forEach(function(c) {
+    var eff = effectiveStatus(c);
+    if (s[eff.status_class] !== undefined) s[eff.status_class]++;
+  });
+
   document.getElementById("summary-bar").innerHTML =
     '<div class="summary-item alert"><span class="summary-count">' + s.alert + '</span> 回答待ち</div>' +
     '<div class="summary-item warn"><span class="summary-count">' + s.warn + '</span> 注意</div>' +
     '<div class="summary-item ok"><span class="summary-count">' + s.ok + '</span> 提出待ち</div>' +
     '<div class="summary-item completed"><span class="summary-count">' + s.completed + '</span> 完了</div>';
 
-  var clients = DATA.clients;
   document.getElementById("alert-banner").innerHTML = renderAlerts(clients);
 
-  // アクティブ（完了以外）をステータス順にソート: alert → warn → ok → unknown
+  // アクティブ（完了以外）をステータス順にソート
   var order = { alert: 0, warn: 1, ok: 2, unknown: 3 };
-  var active = clients.filter(function(c) { return c.status_class !== "completed"; });
+  var active = clients.filter(function(c) { return effectiveStatus(c).status_class !== "completed"; });
   active.sort(function(a, b) {
-    var oa = order[a.status_class] !== undefined ? order[a.status_class] : 3;
-    var ob = order[b.status_class] !== undefined ? order[b.status_class] : 3;
+    var oa = order[effectiveStatus(a).status_class]; if (oa === undefined) oa = 3;
+    var ob = order[effectiveStatus(b).status_class]; if (ob === undefined) ob = 3;
     if (oa !== ob) return oa - ob;
     return (a.days_ago || 0) - (b.days_ago || 0);
   });
@@ -326,7 +430,7 @@ function render() {
   document.getElementById("active-section").innerHTML = html;
 
   // 完了セクション（折りたたみ）
-  var done = clients.filter(function(c) { return c.status_class === "completed"; });
+  var done = clients.filter(function(c) { return effectiveStatus(c).status_class === "completed"; });
   if (done.length) {
     document.getElementById("completed-section").innerHTML =
       '<details class="completed-section"><summary>完了（' + done.length + '名）</summary>' +
